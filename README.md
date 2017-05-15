@@ -1,10 +1,9 @@
 # iwordcloudle
-Immigration word cloud from Twitter with sentiment analysis.
+Word cloud from Twitter.
 
-Uses the Twiiter API to get the last n tweets with predetermined keywords from 
+Uses the Twiter API to get the last n tweets with predetermined keywords from 
 Twitter, then -
 
-* Perform sentiment analysis
 * Strip out common words like "the" and "a"
 * Create word cloud
 
@@ -12,6 +11,7 @@ Twitter, then -
 * Python 3+
 * Tweepy
 * Textblob
+* Wordcloud
 
 # Usage
 Run `python3 create_cloud.py --help`

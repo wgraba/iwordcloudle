@@ -77,9 +77,9 @@ class TwitterClient(object):
                 if tweet.retweet_count > 0:
                     # if tweet has retweets, ensure that it is appended only once
                     if parsed_tweet not in tweets:
-                        tweets.append(parsed_tweet)
+                        tweets.append(parsed_tweet['text'])
                 else:
-                    tweets.append(parsed_tweet)
+                    tweets.append(parsed_tweet['text'])
 
             # return parsed tweets
             return tweets
