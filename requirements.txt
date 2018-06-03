@@ -1,4 +1,3 @@
 tweepy
-textblob
 wordcloud
 
