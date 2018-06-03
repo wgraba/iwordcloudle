@@ -1,7 +1,9 @@
-import re
+import logging
 import tweepy
 from tweepy import OAuthHandler
 # from textblob import TextBlob
+
+logger = logging.getLogger(__name__)
 
 
 class TwitterClient(object):
@@ -15,25 +17,10 @@ class TwitterClient(object):
         Class constructor or initialization method.
         """
 
-        # attempt authentication
-        try:
-            # create OAuthHandler object
-            self.auth = OAuthHandler(consumer_key, consumer_secret)
-            # set access token and secret
-            self.auth.set_access_token(access_token, access_token_secret)
-            # create tweepy API object to fetch tweets
-            self.api = tweepy.API(self.auth)
-        except:
-            print("Error: Authentication Failed")
-
-    @staticmethod
-    def clean_tweet(tweet):
-        """
-        Utility function to clean tweet text by removing links, special characters
-        using simple regex statements.
-        """
-        return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])| (\w +:\ / \ / \S +)",
-                               " ", tweet).split())
+        logger.info('Attempting Twitter authentication...')
+        self.auth = OAuthHandler(consumer_key, consumer_secret)
+        self.auth.set_access_token(access_token, access_token_secret)
+        self.api = tweepy.API(self.auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
     # def get_tweet_sentiment(self, tweet):
     #     """
@@ -51,39 +38,35 @@ class TwitterClient(object):
     #     else:
     #         return 'negative'
 
-    def get_tweets(self, query, count=10):
+    def get_tweets(self, query, count):
         """
         Main function to fetch tweets and parse them.
         """
 
-        # empty list to store parsed tweets
         tweets = []
 
-        try:
-            # call twitter api to fetch tweets
-            fetched_tweets = self.api.search(q=query, count=count)
+        logger.info('Getting tweets...')
+        fetched_tweets = tweepy.Cursor(self.api.search, q=query).items(count)
+        # logger.info('Found {:d} total Tweets'.format(len(fetched_tweets)))
 
-            # parsing tweets one by one
-            for tweet in fetched_tweets:
-                # empty dictionary to store required params of a tweet
-                parsed_tweet = {}
+        # logger.info('Removing re-Tweets...')
+        for tweet in fetched_tweets:
+            # parsed_tweet = {'text': tweet.text}
+            #
+            # # saving text of tweet
+            # # saving sentiment of tweet
+            # # parsed_tweet['sentiment'] = self.get_tweet_sentiment(tweet.text)
+            #
+            # # appending parsed tweet to tweets list
+            # if tweet.retweet_count > 0:
+            #     # if tweet has retweets, ensure that it is appended only once
+            #     if parsed_tweet not in tweets:
+            #         tweets.append(parsed_tweet['text'])
+            # else:
+            #     tweets.append(parsed_tweet['text'])
 
-                # saving text of tweet
-                parsed_tweet['text'] = tweet.text
-                # saving sentiment of tweet
-                # parsed_tweet['sentiment'] = self.get_tweet_sentiment(tweet.text)
+            tweets.append(tweet.text)
 
-                # appending parsed tweet to tweets list
-                if tweet.retweet_count > 0:
-                    # if tweet has retweets, ensure that it is appended only once
-                    if parsed_tweet not in tweets:
-                        tweets.append(parsed_tweet['text'])
-                else:
-                    tweets.append(parsed_tweet['text'])
+        logger.info('Found {:d} Tweets'.format(len(tweets)))
 
-            # return parsed tweets
-            return tweets
-
-        except tweepy.TweepError as e:
-            # print error (if any)
-            print("Error : " + str(e))
+        return tweets
